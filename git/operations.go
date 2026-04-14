@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -143,6 +142,32 @@ func getMergeBaseSHA(repoPath, leftRef, rightRef string) (string, bool, error) {
 	return strings.TrimSpace(string(output)), true, nil
 }
 
+// RefIsAncestor reports whether ancestorRef is an ancestor of descendantRef
+// (git merge-base --is-ancestor).
+func RefIsAncestor(repoPath, ancestorRef, descendantRef string) (bool, error) {
+	cmd := exec.Command("git", "merge-base", "--is-ancestor", ancestorRef, descendantRef)
+	cmd.Dir = repoPath
+	err := cmd.Run()
+	if err == nil {
+		return true, nil
+	}
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
+		return false, nil
+	}
+	return false, fmt.Errorf("git merge-base --is-ancestor %s %s failed: %w", ancestorRef, descendantRef, err)
+}
+
+// FetchRemote runs git fetch for a single remote name.
+func FetchRemote(repoPath, remote string) error {
+	cmd := exec.Command("git", "fetch", remote)
+	cmd.Dir = repoPath
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return commandError("git fetch", err, output)
+	}
+	return nil
+}
+
 // CreateFireBranch creates a new fire backup branch.
 func CreateFireBranch(repoPath, originalBranch, localSHA string) (string, error) {
 	timestamp := time.Now().Format("20060102-150405")
@@ -152,7 +177,9 @@ func CreateFireBranch(repoPath, originalBranch, localSHA string) (string, error)
 	}
 
 	branchName := fmt.Sprintf("git-fire-backup-%s-%s-%s", originalBranch, timestamp, shortSHA)
-	cmd := exec.Command("git", "branch", branchName)
+	// Point the backup ref at localSHA — never at current HEAD. Callers may be on
+	// a different branch while backing up a diverged or inactive local branch.
+	cmd := exec.Command("git", "branch", branchName, localSHA)
 	cmd.Dir = repoPath
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return "", commandError("git branch "+branchName, err, output)
@@ -184,47 +211,8 @@ func PushAllBranches(repoPath, remote string) error {
 	return nil
 }
 
-// PushKnownBranches pushes only branches that exist on the remote.
-func PushKnownBranches(repoPath, remote string) error {
-	cmd := exec.Command("git", "fetch", remote)
-	cmd.Dir = repoPath
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return commandError("git fetch", err, output)
-	}
-
-	remoteBranches, err := getRemoteBranches(repoPath, remote)
-	if err != nil {
-		return fmt.Errorf("failed to get remote branches: %w", err)
-	}
-	localBranches, err := getLocalBranches(repoPath)
-	if err != nil {
-		return fmt.Errorf("failed to get local branches: %w", err)
-	}
-
-	var errs []error
-	for _, localBranch := range localBranches {
-		exists := false
-		for _, remoteBranch := range remoteBranches {
-			if remoteBranch == localBranch {
-				exists = true
-				break
-			}
-		}
-
-		if exists {
-			if err := PushBranch(repoPath, remote, localBranch); err != nil {
-				errs = append(errs, fmt.Errorf("branch %s: %w", localBranch, err))
-			}
-			continue
-		}
-
-		fmt.Fprintf(os.Stderr, "warning: branch '%s' has no remote tracking ref — not backed up\n", localBranch)
-	}
-
-	return errors.Join(errs...)
-}
-
-func getRemoteBranches(repoPath, remote string) ([]string, error) {
+// ListRemoteBranches returns short branch names under remote/ (excluding HEAD).
+func ListRemoteBranches(repoPath, remote string) ([]string, error) {
 	cmd := exec.Command("git", "branch", "-r", "--format=%(refname:short)")
 	cmd.Dir = repoPath
 	output, err := cmd.Output()
@@ -250,7 +238,8 @@ func getRemoteBranches(repoPath, remote string) ([]string, error) {
 	return branches, nil
 }
 
-func getLocalBranches(repoPath string) ([]string, error) {
+// ListLocalBranches returns local branch short names.
+func ListLocalBranches(repoPath string) ([]string, error) {
 	cmd := exec.Command("git", "branch", "--format=%(refname:short)")
 	cmd.Dir = repoPath
 	output, err := cmd.Output()
