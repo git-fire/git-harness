@@ -1,0 +1,61 @@
+{
+  "name": "git-harness-cli protocol",
+  "version": "1.0.0",
+  "transport": "stdin JSON request -> stdout JSON response",
+  "request_schema": {
+    "type": "object",
+    "required": ["op"],
+    "properties": {
+      "op": {"type": "string"},
+      "repoPath": {"type": "string"},
+      "ref": {"type": "string"},
+      "branch": {"type": "string"},
+      "remote": {"type": "string"},
+      "scanOptions": {"type": "object"},
+      "text": {"type": "string"},
+      "files": {"type": "array", "items": {"type": "string"}}
+    }
+  },
+  "response_schema": {
+    "type": "object",
+    "required": ["ok"],
+    "properties": {
+      "ok": {"type": "boolean"},
+      "error": {"type": "string"},
+      "repositories": {"type": "array"},
+      "repository": {"type": "object"},
+      "dirty": {"type": "boolean"},
+      "sha": {"type": "string"},
+      "branches": {"type": "array", "items": {"type": "string"}},
+      "text": {"type": "string"},
+      "notice": {"type": "string"},
+      "suspiciousFiles": {"type": "array"}
+    }
+  },
+  "supported_ops": [
+    "scan_repositories",
+    "analyze_repository",
+    "git_is_dirty",
+    "git_get_current_branch",
+    "git_get_commit_sha",
+    "git_list_local_branches",
+    "git_list_remote_branches",
+    "git_ref_is_ancestor",
+    "git_detect_conflict",
+    "git_has_staged_changes",
+    "git_has_unstaged_changes",
+    "git_get_uncommitted_files",
+    "git_list_worktrees",
+    "git_auto_commit_dirty",
+    "git_auto_commit_dirty_with_strategy",
+    "git_create_fire_branch",
+    "git_fetch_remote",
+    "git_push_branch",
+    "git_push_all_branches",
+    "safety_sanitize_text",
+    "safety_recommended_gitignore_patterns",
+    "safety_security_notice",
+    "safety_format_warning",
+    "safety_scan_files"
+  ]
+}

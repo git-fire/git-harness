@@ -7,7 +7,7 @@ Set `GIT_HARNESS_CLI` to a prebuilt binary path (recommended in CI), or rely on 
 ## Development
 
 ```bash
-cd wrappers/python
+cd testkit/python
 python -m pip install -e ".[dev]"
 python -m pytest tests/ -v
 ```

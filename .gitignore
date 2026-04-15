@@ -1,8 +1,8 @@
 # Local reference clones (not part of this module)
 /mnt/
 
-# Wrapper build artifacts
-wrappers/python/**/__pycache__/
-wrappers/python/**/*.egg-info/
-wrappers/python/.pytest_cache/
-wrappers/java/target/
+# testkit (polyglot) build artifacts
+testkit/python/**/__pycache__/
+testkit/python/**/*.egg-info/
+testkit/python/.pytest_cache/
+testkit/java/target/

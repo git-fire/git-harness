@@ -11,7 +11,7 @@ Go library extracted from [git-fire](https://github.com/git-fire/git-fire): subp
 
 ## Polyglot wrappers
 
-Python and Java clients talk to the same JSON stdin/stdout bridge as [git-testkit](https://github.com/git-fire/git-testkit): build `cmd/git-harness-cli`, then point `GIT_HARNESS_CLI` at the binary (or use `go run ./cmd/git-harness-cli` from the repo root). See `wrappers/python` and `wrappers/java`. Runnable samples live under `wrappers/python/samples/` and in the Java `Sample*Smoke` tests.
+Python and Java clients use the same layout as [git-testkit](https://github.com/git-fire/git-testkit) under **`testkit/`**: build `cmd/git-harness-cli`, set **`GIT_HARNESS_CLI`** to that binary (or rely on `go run ./cmd/git-harness-cli` from the repo root). Code lives in `testkit/python` and `testkit/java`; runnable samples are `testkit/python/samples/` and the Java `Sample*Smoke` tests.
 
 ## Requirements
 

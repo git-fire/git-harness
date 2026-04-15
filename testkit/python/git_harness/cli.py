@@ -11,7 +11,7 @@ _CLI_TIMEOUT_SECONDS = 120
 
 
 def _repo_root() -> Path:
-    # wrappers/python/git_harness/cli.py -> repo root
+    # testkit/python/git_harness/cli.py -> repository root
     return Path(__file__).resolve().parents[3]
 
 

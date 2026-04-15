@@ -7,7 +7,7 @@ Set `GIT_HARNESS_CLI` to a prebuilt binary, or use `go run ./cmd/git-harness-cli
 ## Build and test
 
 ```bash
-cd wrappers/java
+cd testkit/java
 mvn test
 ```
 
