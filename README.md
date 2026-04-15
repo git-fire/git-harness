@@ -9,6 +9,10 @@ Go library extracted from [git-fire](https://github.com/git-fire/git-fire): subp
 - **`git`** — repository scanning, status, commits, pushes, worktrees, and related helpers.
 - **`safety`** — redaction and secret-pattern scanning helpers used by git error paths.
 
+## Polyglot wrappers
+
+Python and Java clients talk to the same JSON stdin/stdout bridge as [git-testkit](https://github.com/git-fire/git-testkit): build `cmd/git-harness-cli`, then point `GIT_HARNESS_CLI` at the binary (or use `go run ./cmd/git-harness-cli` from the repo root). See `wrappers/python` and `wrappers/java`.
+
 ## Requirements
 
 - Go **1.24**+ (see `go.mod`).
