@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -59,10 +60,11 @@ def main() -> int:
             raise RuntimeError(f"sha mismatch local={local_sha} remote={out}")
 
         repos = client.scan_repositories(
-            ScanOptions(root_path=str(base), use_cache=False, max_depth=10)
+            ScanOptions(root_path=str(base), use_cache=False, max_depth=30)
         )
-        paths = {r["path"] for r in repos}
-        if str(local.resolve()) not in paths:
+        # macOS often differs between symlinked paths (/var vs /private/var); compare real paths.
+        local_key = Path(os.path.realpath(local))
+        if not any(Path(os.path.realpath(r["path"])) == local_key for r in repos):
             raise RuntimeError("scan_repositories did not find local repo")
 
         print("python sample repo flow: OK")

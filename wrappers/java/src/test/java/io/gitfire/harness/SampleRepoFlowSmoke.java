@@ -1,5 +1,6 @@
 package io.gitfire.harness;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -82,10 +83,18 @@ class SampleRepoFlowSmoke {
 
     List<CliBridge.RepositoryMeta> repos =
         bridge.scanRepositories(
-            new CliBridge.ScanOptions().rootPath(base.toString()).useCache(false).maxDepth(10));
-    Path localAbs = local.toAbsolutePath().normalize();
+            new CliBridge.ScanOptions().rootPath(base.toString()).useCache(false).maxDepth(30));
+    Path localReal = local.toRealPath();
     boolean found =
-        repos.stream().anyMatch(r -> Path.of(r.path()).toAbsolutePath().normalize().equals(localAbs));
+        repos.stream()
+            .anyMatch(
+                r -> {
+                  try {
+                    return Path.of(r.path()).toRealPath().equals(localReal);
+                  } catch (IOException e) {
+                    return false;
+                  }
+                });
     if (!found) {
       throw new IllegalStateException("scan_repositories did not find local repo");
     }
