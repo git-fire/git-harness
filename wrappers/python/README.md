@@ -11,3 +11,5 @@ cd wrappers/python
 python -m pip install -e ".[dev]"
 python -m pytest tests/ -v
 ```
+
+Samples: see `samples/README.md`.

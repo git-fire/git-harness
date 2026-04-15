@@ -10,3 +10,9 @@ Set `GIT_HARNESS_CLI` to a prebuilt binary, or use `go run ./cmd/git-harness-cli
 cd wrappers/java
 mvn test
 ```
+
+Sample smoke tests (also run in CI):
+
+```bash
+mvn -Dtest=SampleRepoFlowSmoke,SampleSafetyFlowSmoke test
+```

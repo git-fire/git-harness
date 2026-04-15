@@ -232,6 +232,14 @@ public final class CliBridge {
     return invokeObject(req).get("branch").getAsString();
   }
 
+  public String getCommitSHA(String repoPath, String ref) {
+    JsonObject req = new JsonObject();
+    req.addProperty("op", "git_get_commit_sha");
+    req.addProperty("repoPath", repoPath);
+    req.addProperty("ref", ref);
+    return invokeObject(req).get("sha").getAsString();
+  }
+
   public String safetySanitizeText(String text) {
     JsonObject req = new JsonObject();
     req.addProperty("op", "safety_sanitize_text");

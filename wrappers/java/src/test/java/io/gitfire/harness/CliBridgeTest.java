@@ -12,7 +12,7 @@ import org.junit.jupiter.api.io.TempDir;
 class CliBridgeTest {
   @TempDir Path tmp;
 
-  private static Path workspaceRoot() {
+  static Path workspaceRoot() {
     return Path.of("../..").toAbsolutePath().normalize();
   }
 
@@ -41,6 +41,8 @@ class CliBridgeTest {
     Path repo = tmp.resolve("r");
     Files.createDirectories(repo);
     runGit(repo, "init");
+    runGit(repo, "config", "user.email", "harness-test@example.com");
+    runGit(repo, "config", "user.name", "git-harness test");
     Files.writeString(repo.resolve("a.txt"), "x\n");
     runGit(repo, "add", "a.txt");
     runGit(repo, "commit", "-m", "init");
@@ -79,6 +81,8 @@ class CliBridgeTest {
     Path inner = outer.resolve("nested").resolve("proj");
     Files.createDirectories(inner);
     runGit(inner, "init");
+    runGit(inner, "config", "user.email", "harness-test@example.com");
+    runGit(inner, "config", "user.name", "git-harness test");
     Files.writeString(inner.resolve("f"), "1\n");
     runGit(inner, "add", "f");
     runGit(inner, "commit", "-m", "c");

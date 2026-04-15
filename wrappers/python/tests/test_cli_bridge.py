@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -8,7 +10,15 @@ from git_harness import GitHarnessClient
 
 
 def _run_git(repo: Path, *args: str) -> None:
-    subprocess.run(["git", *args], cwd=repo, check=True, capture_output=True)
+    subprocess.run(
+        ["git", *args],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
 
 
 def test_analyze_repository_finds_git_dir(tmp_path: Path) -> None:
@@ -68,16 +78,24 @@ def test_scan_repositories_finds_nested_repo(tmp_path: Path) -> None:
 def test_subprocess_json_contract_smoke() -> None:
     """Guardrail: stdin JSON shape accepted by the Go CLI."""
     root = Path(__file__).resolve().parents[3]
+    cli = os.environ.get("GIT_HARNESS_CLI", "").strip()
+    cmd = [cli] if cli else ["go", "run", "./cmd/git-harness-cli"]
+    if cli and not Path(cli).is_file() and shutil.which(cli) is None:
+        # Relative path from repo root (typical in CI)
+        cmd = [str((root / cli).resolve())]
     proc = subprocess.run(
-        ["go", "run", "./cmd/git-harness-cli"],
+        cmd,
         cwd=root,
         input=json.dumps({"op": "safety_security_notice"}),
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
         check=False,
         timeout=120,
     )
     assert proc.returncode == 0, proc.stderr
-    body = json.loads(proc.stdout.strip())
+    stdout = (proc.stdout or "").strip()
+    body = json.loads(stdout)
     assert body["ok"] is True
     assert "notice" in body and len(body["notice"]) > 0

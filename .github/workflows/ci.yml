@@ -64,12 +64,27 @@ jobs:
           python -m pip install -e ".[dev]"
           python -m pytest tests/ -v
 
+      - name: Run Python sample smoke implementations
+        env:
+          GIT_HARNESS_CLI: ./bin/git-harness-cli
+        run: |
+          cd wrappers/python
+          python -m samples.smoke_repo_flow
+          python -m samples.smoke_safety_flow
+
       - name: Run Java wrapper tests
         env:
           GIT_HARNESS_CLI: ./bin/git-harness-cli
         run: |
           cd wrappers/java
           mvn test
+
+      - name: Run Java sample smoke implementations
+        env:
+          GIT_HARNESS_CLI: ./bin/git-harness-cli
+        run: |
+          cd wrappers/java
+          mvn -Dtest=SampleRepoFlowSmoke,SampleSafetyFlowSmoke test
 
   wrapper-cross-platform:
     runs-on: ${{ matrix.os }}
@@ -115,6 +130,15 @@ jobs:
           python -m pip install -e ".[dev]"
           python -m pytest tests/ -v
 
+      - name: Run Python sample smoke implementations
+        shell: bash
+        env:
+          GIT_HARNESS_CLI: ${{ matrix.os == 'windows-latest' && './bin/git-harness-cli.exe' || './bin/git-harness-cli' }}
+        run: |
+          cd wrappers/python
+          python -m samples.smoke_repo_flow
+          python -m samples.smoke_safety_flow
+
       - name: Run Java wrapper smoke tests
         shell: bash
         env:
@@ -122,3 +146,11 @@ jobs:
         run: |
           cd wrappers/java
           mvn test
+
+      - name: Run Java sample smoke implementations
+        shell: bash
+        env:
+          GIT_HARNESS_CLI: ${{ matrix.os == 'windows-latest' && './bin/git-harness-cli.exe' || './bin/git-harness-cli' }}
+        run: |
+          cd wrappers/java
+          mvn -Dtest=SampleRepoFlowSmoke,SampleSafetyFlowSmoke test
