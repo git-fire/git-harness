@@ -33,6 +33,8 @@ def _call(op: str, **payload: Any) -> dict[str, Any]:
             cwd=_repo_root(),
             input=json.dumps(request),
             text=True,
+            encoding="utf-8",
+            errors="replace",
             capture_output=True,
             check=False,
             timeout=_CLI_TIMEOUT_SECONDS,
