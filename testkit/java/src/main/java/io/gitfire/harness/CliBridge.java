@@ -244,13 +244,17 @@ public final class CliBridge {
     JsonObject req = new JsonObject();
     req.addProperty("op", "safety_sanitize_text");
     req.addProperty("text", text == null ? "" : text);
-    return invokeObject(req).get("text").getAsString();
+    JsonObject res = invokeObject(req);
+    return res.has("text") && !res.get("text").isJsonNull() ? res.get("text").getAsString() : "";
   }
 
   public String safetySecurityNotice() {
     JsonObject req = new JsonObject();
     req.addProperty("op", "safety_security_notice");
-    return invokeObject(req).get("notice").getAsString();
+    JsonObject res = invokeObject(req);
+    return res.has("notice") && !res.get("notice").isJsonNull()
+        ? res.get("notice").getAsString()
+        : "";
   }
 
   public List<WorktreeInfo> listWorktrees(String repoPath) {

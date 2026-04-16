@@ -16,10 +16,6 @@ import org.junit.jupiter.api.io.TempDir;
 class SampleRepoFlowSmoke {
   @TempDir Path tmp;
 
-  private static Path workspaceRoot() {
-    return Path.of("../..").toAbsolutePath().normalize();
-  }
-
   private static void runGit(Path dir, String... args) throws Exception {
     runGitStdout(dir, args);
   }
@@ -65,7 +61,7 @@ class SampleRepoFlowSmoke {
     runGit(local, "add", "README.md");
     runGit(local, "commit", "-m", "init");
 
-    CliBridge bridge = new CliBridge(workspaceRoot());
+    CliBridge bridge = new CliBridge(CliBridgeTest.workspaceRoot());
     String branch = bridge.getCurrentBranch(local.toString());
 
     runGit(local, "remote", "add", "origin", remote.toAbsolutePath().normalize().toString());

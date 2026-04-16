@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import os.path
 import shutil
 import subprocess
 from pathlib import Path
@@ -32,7 +33,7 @@ def test_analyze_repository_finds_git_dir(tmp_path: Path) -> None:
     client = GitHarnessClient()
     meta = client.analyze_repository(repo)
 
-    assert meta["path"] == str(repo.absolute())
+    assert os.path.realpath(meta["path"]) == os.path.realpath(str(repo))
     assert meta["name"] == "r"
     assert meta["isDirty"] is False
 
@@ -56,6 +57,16 @@ def test_safety_sanitize_text_masks_token() -> None:
     assert "[REDACTED]" in out
 
 
+def test_safety_sanitize_text_empty_string_round_trip() -> None:
+    client = GitHarnessClient()
+    assert client.safety_sanitize_text("") == ""
+
+
+def test_safety_format_warning_empty_list() -> None:
+    client = GitHarnessClient()
+    assert client.safety_format_warning([]) == ""
+
+
 def test_scan_repositories_finds_nested_repo(tmp_path: Path) -> None:
     outer = tmp_path / "outer"
     inner = outer / "nested" / "proj"
@@ -70,8 +81,8 @@ def test_scan_repositories_finds_nested_repo(tmp_path: Path) -> None:
     repos = client.scan_repositories(
         ScanOptions(root_path=str(outer), use_cache=False, max_depth=20)
     )
-    paths = {r["path"] for r in repos}
-    assert str(inner.absolute()) in paths
+    paths = {os.path.realpath(r["path"]) for r in repos}
+    assert os.path.realpath(str(inner)) in paths
 
 
 def test_subprocess_json_contract_smoke() -> None:

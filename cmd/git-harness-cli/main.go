@@ -87,7 +87,7 @@ type response struct {
 	Text            string                 `json:"text"`
 	Lines           []string               `json:"lines,omitempty"`
 	Warning         string                 `json:"warning"`
-	Notice          string                 `json:"notice,omitempty"`
+	Notice          string                 `json:"notice"`
 	SuspiciousFiles []suspiciousFileOutput `json:"suspiciousFiles,omitempty"`
 }
 

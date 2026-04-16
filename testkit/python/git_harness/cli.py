@@ -204,7 +204,7 @@ class GitHarnessClient:
             originalBranch=original_branch,
             localSHA=local_sha,
         )
-        return str(res["fireBranch"])
+        return str(res.get("fireBranch", ""))
 
     def fetch_remote(self, repo_path: str, remote: str) -> None:
         _call("git_fetch_remote", repoPath=repo_path, remote=remote)
@@ -217,7 +217,7 @@ class GitHarnessClient:
 
     def safety_sanitize_text(self, text: str) -> str:
         res = _call("safety_sanitize_text", text=text)
-        return str(res["text"])
+        return str(res.get("text", ""))
 
     def safety_recommended_gitignore_patterns(self) -> list[str]:
         res = _call("safety_recommended_gitignore_patterns")
@@ -225,11 +225,11 @@ class GitHarnessClient:
 
     def safety_security_notice(self) -> str:
         res = _call("safety_security_notice")
-        return str(res["notice"])
+        return str(res.get("notice", ""))
 
     def safety_format_warning(self, files: list[dict[str, Any]]) -> str:
         res = _call("safety_format_warning", suspiciousFiles=files)
-        return str(res["warning"])
+        return str(res.get("warning", ""))
 
     def safety_scan_files(self, repo_path: str, files: list[str]) -> list[dict[str, Any]]:
         res = _call("safety_scan_files", repoPath=repo_path, files=files)
