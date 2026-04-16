@@ -1,5 +1,8 @@
 package io.gitfire.harness;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,6 +21,10 @@ class SampleRepoFlowSmoke {
   }
 
   private static void runGit(Path dir, String... args) throws Exception {
+    runGitStdout(dir, args);
+  }
+
+  private static String runGitStdout(Path dir, String... args) throws Exception {
     List<String> cmd = new ArrayList<>();
     cmd.add("git");
     for (String a : args) {
@@ -31,11 +38,14 @@ class SampleRepoFlowSmoke {
       p.destroyForcibly();
       throw new RuntimeException("git timeout");
     }
+    String stdout =
+        new String(p.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
     if (p.exitValue() != 0) {
       String err =
           new String(p.getErrorStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
       throw new RuntimeException("git failed: " + err);
     }
+    return stdout.trim();
   }
 
   @Test
@@ -62,24 +72,8 @@ class SampleRepoFlowSmoke {
     runGit(local, "push", "-u", "origin", branch);
 
     String localSha = bridge.getCommitSHA(local.toString(), branch);
-    ProcessBuilder rev =
-        new ProcessBuilder("git", "rev-parse", branch).directory(remote.toFile());
-    Process pr = rev.start();
-    boolean done = pr.waitFor(60, TimeUnit.SECONDS);
-    if (!done) {
-      pr.destroyForcibly();
-      throw new RuntimeException("git rev-parse timeout");
-    }
-    if (pr.exitValue() != 0) {
-      throw new RuntimeException(
-          new String(pr.getErrorStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
-    }
-    String remoteSha =
-        new String(pr.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8)
-            .trim();
-    if (!localSha.equals(remoteSha)) {
-      throw new IllegalStateException("SHA mismatch local=" + localSha + " remote=" + remoteSha);
-    }
+    String remoteSha = runGitStdout(remote, "rev-parse", branch);
+    assertEquals(localSha, remoteSha, "SHA mismatch between local and remote");
 
     List<CliBridge.RepositoryMeta> repos =
         bridge.scanRepositories(
@@ -95,8 +89,6 @@ class SampleRepoFlowSmoke {
                     return false;
                   }
                 });
-    if (!found) {
-      throw new IllegalStateException("scan_repositories did not find local repo");
-    }
+    assertTrue(found, "scan_repositories did not find local repo");
   }
 }

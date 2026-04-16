@@ -1,5 +1,6 @@
 package io.gitfire.harness;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -52,7 +53,10 @@ class CliBridgeTest {
 
     assertTrue(Files.exists(repo.resolve(".git")));
     assertFalse(meta.isDirty());
-    assertTrue(meta.path().endsWith("r") || meta.path().contains("r"));
+    assertEquals(
+        repo.toAbsolutePath().normalize().toString(),
+        meta.path(),
+        "analyzeRepository should return the exact repository path");
   }
 
   @Test

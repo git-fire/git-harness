@@ -15,4 +15,5 @@ Or from repo root using `PYTHONPATH`:
 
 ```bash
 PYTHONPATH=testkit/python python3 testkit/python/samples/smoke_repo_flow.py
+PYTHONPATH=testkit/python python3 testkit/python/samples/smoke_safety_flow.py
 ```

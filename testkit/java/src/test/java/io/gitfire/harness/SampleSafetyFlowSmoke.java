@@ -11,7 +11,8 @@ class SampleSafetyFlowSmoke {
     CliBridge bridge = new CliBridge(CliBridgeTest.workspaceRoot());
     String token = "ghp_" + "a".repeat(36);
     String out = bridge.safetySanitizeText("export TOKEN=" + token);
-    assertFalse(out.contains("ghp_"));
+    assertFalse(out.contains(token));
+    assertTrue(out.contains("[REDACTED]"));
     String notice = bridge.safetySecurityNotice();
     assertTrue(notice.length() > 10);
   }

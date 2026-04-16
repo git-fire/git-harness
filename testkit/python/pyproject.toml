@@ -15,7 +15,7 @@ dev = ["pytest"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["git_harness*", "samples*"]
+include = ["git_harness*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

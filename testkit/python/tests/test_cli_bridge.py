@@ -6,7 +6,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from git_harness import GitHarnessClient
+from git_harness import GitHarnessClient, ScanOptions
 
 
 def _run_git(repo: Path, *args: str) -> None:
@@ -66,7 +66,6 @@ def test_scan_repositories_finds_nested_repo(tmp_path: Path) -> None:
     _run_git(inner, "commit", "-m", "c")
 
     client = GitHarnessClient()
-    from git_harness import ScanOptions
 
     repos = client.scan_repositories(
         ScanOptions(root_path=str(outer), use_cache=False, max_depth=20)

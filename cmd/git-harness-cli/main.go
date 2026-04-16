@@ -150,7 +150,10 @@ func parseRequest() (request, error) {
 func handle(req request) (response, error) {
 	switch req.Op {
 	case "scan_repositories":
-		opts := mergeScanOptions(req.ScanOptions)
+		opts, err := mergeScanOptions(req.ScanOptions)
+		if err != nil {
+			return response{}, err
+		}
 		repos, err := git.ScanRepositories(opts)
 		if err != nil {
 			return response{}, err
@@ -428,10 +431,10 @@ func handle(req request) (response, error) {
 	}
 }
 
-func mergeScanOptions(in *scanOptionsInput) git.ScanOptions {
+func mergeScanOptions(in *scanOptionsInput) (git.ScanOptions, error) {
 	opts := git.DefaultScanOptions()
 	if in == nil {
-		return opts
+		return opts, nil
 	}
 	if in.RootPath != "" {
 		opts.RootPath = in.RootPath
@@ -451,11 +454,9 @@ func mergeScanOptions(in *scanOptionsInput) git.ScanOptions {
 	if in.CacheTTL != "" {
 		d, err := time.ParseDuration(in.CacheTTL)
 		if err != nil {
-			// Invalid duration falls back to default rather than failing merge.
-			_ = err
-		} else {
-			opts.CacheTTL = d
+			return git.ScanOptions{}, fmt.Errorf("invalid scanOptions.cacheTTL %q: %w", in.CacheTTL, err)
 		}
+		opts.CacheTTL = d
 	}
 	if in.Workers > 0 {
 		opts.Workers = in.Workers
@@ -464,7 +465,7 @@ func mergeScanOptions(in *scanOptionsInput) git.ScanOptions {
 		opts.KnownPaths = in.KnownPaths
 	}
 	opts.DisableScan = in.DisableScan
-	return opts
+	return opts, nil
 }
 
 func repoToOut(r git.Repository) repositoryOut {
@@ -472,11 +473,15 @@ func repoToOut(r git.Repository) repositoryOut {
 	for _, x := range r.Remotes {
 		rem = append(rem, remoteOut{Name: x.Name, URL: x.URL})
 	}
+	branches := r.Branches
+	if branches == nil {
+		branches = []string{}
+	}
 	return repositoryOut{
 		Path:         r.Path,
 		Name:         r.Name,
 		Remotes:      rem,
-		Branches:     r.Branches,
+		Branches:     branches,
 		IsDirty:      r.IsDirty,
 		LastModified: r.LastModified,
 		Selected:     r.Selected,

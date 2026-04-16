@@ -9,11 +9,32 @@
       "op": {"type": "string"},
       "repoPath": {"type": "string"},
       "ref": {"type": "string"},
+      "ancestorRef": {"type": "string"},
+      "descendantRef": {"type": "string"},
       "branch": {"type": "string"},
       "remote": {"type": "string"},
+      "originalBranch": {"type": "string"},
+      "localSHA": {"type": "string"},
+      "message": {"type": "string"},
+      "addAll": {"type": "boolean"},
+      "useDualBranch": {"type": "boolean"},
+      "returnToOriginal": {"type": "boolean"},
+      "args": {"type": "array", "items": {"type": "string"}},
       "scanOptions": {"type": "object"},
       "text": {"type": "string"},
-      "files": {"type": "array", "items": {"type": "string"}}
+      "files": {"type": "array", "items": {"type": "string"}},
+      "suspiciousFiles": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "path": {"type": "string"},
+            "reason": {"type": "string"},
+            "patterns": {"type": "array", "items": {"type": "string"}},
+            "lineNumbers": {"type": "array", "items": {"type": "integer"}}
+          }
+        }
+      }
     }
   },
   "response_schema": {
@@ -25,11 +46,49 @@
       "repositories": {"type": "array"},
       "repository": {"type": "object"},
       "dirty": {"type": "boolean"},
+      "output": {"type": "string"},
       "sha": {"type": "string"},
+      "branch": {"type": "string"},
+      "hasConflict": {"type": "boolean"},
+      "localSHA": {"type": "string"},
+      "remoteSHA": {"type": "string"},
+      "isAncestor": {"type": "boolean"},
+      "staged": {"type": "boolean"},
+      "unstaged": {"type": "boolean"},
+      "paths": {"type": "array", "items": {"type": "string"}},
       "branches": {"type": "array", "items": {"type": "string"}},
+      "worktrees": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "path": {"type": "string"},
+            "branch": {"type": "string"},
+            "head": {"type": "string"},
+            "isMain": {"type": "boolean"}
+          }
+        }
+      },
+      "fireBranch": {"type": "string"},
+      "stagedBranch": {"type": "string"},
+      "fullBranch": {"type": "string"},
+      "bothCreated": {"type": "boolean"},
+      "lines": {"type": "array", "items": {"type": "string"}},
       "text": {"type": "string"},
       "notice": {"type": "string"},
-      "suspiciousFiles": {"type": "array"}
+      "warning": {"type": "string"},
+      "suspiciousFiles": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "path": {"type": "string"},
+            "reason": {"type": "string"},
+            "patterns": {"type": "array", "items": {"type": "string"}},
+            "lineNumbers": {"type": "array", "items": {"type": "integer"}}
+          }
+        }
+      }
     }
   },
   "supported_ops": [
