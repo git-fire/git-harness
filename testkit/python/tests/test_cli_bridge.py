@@ -32,7 +32,7 @@ def test_analyze_repository_finds_git_dir(tmp_path: Path) -> None:
     client = GitHarnessClient()
     meta = client.analyze_repository(repo)
 
-    assert meta["path"] == str(repo.resolve())
+    assert meta["path"] == str(repo.absolute())
     assert meta["name"] == "r"
     assert meta["isDirty"] is False
 
@@ -71,7 +71,7 @@ def test_scan_repositories_finds_nested_repo(tmp_path: Path) -> None:
         ScanOptions(root_path=str(outer), use_cache=False, max_depth=20)
     )
     paths = {r["path"] for r in repos}
-    assert str(inner.resolve()) in paths
+    assert str(inner.absolute()) in paths
 
 
 def test_subprocess_json_contract_smoke() -> None:

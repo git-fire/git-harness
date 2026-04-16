@@ -84,9 +84,9 @@ type response struct {
 	StagedBranch    string                 `json:"stagedBranch,omitempty"`
 	FullBranch      string                 `json:"fullBranch,omitempty"`
 	BothCreated     *bool                  `json:"bothCreated,omitempty"`
-	Text            string                 `json:"text,omitempty"`
+	Text            string                 `json:"text"`
 	Lines           []string               `json:"lines,omitempty"`
-	Warning         string                 `json:"warning,omitempty"`
+	Warning         string                 `json:"warning"`
 	Notice          string                 `json:"notice,omitempty"`
 	SuspiciousFiles []suspiciousFileOutput `json:"suspiciousFiles,omitempty"`
 }
