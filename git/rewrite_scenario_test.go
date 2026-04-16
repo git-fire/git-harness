@@ -415,3 +415,39 @@ func TestRunRewriteScenario_CancelledAfterInterveneSkipsVerify(t *testing.T) {
 		t.Fatalf("verifyCalls = %d, want 0", verifyCalls)
 	}
 }
+
+func TestRunRewriteScenario_CancelledInVerifyOnLastAttempt(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	result, err := RunRewriteScenario(ctx, RewriteScenarioOptions{
+		MaxAttempts: 1,
+		Detect: func(_ context.Context, _ int) (bool, error) {
+			return true, nil
+		},
+		Intervene: func(_ context.Context, _ int) error {
+			return nil
+		},
+		Verify: func(_ context.Context, _ int) (bool, error) {
+			cancel()
+			return false, nil
+		},
+	})
+	if err == nil {
+		t.Fatal("RunRewriteScenario() error = nil, want cancellation error")
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("RunRewriteScenario() error = %v, want context.Canceled", err)
+	}
+	if !strings.Contains(err.Error(), "cancelled after verify") {
+		t.Fatalf("error = %v, want message about post-verify cancellation", err)
+	}
+	if result.Attempts != 1 {
+		t.Fatalf("result.Attempts = %d, want 1", result.Attempts)
+	}
+	if len(result.Passes) != 1 || !result.Passes[0].Intervened || result.Passes[0].CleanAfterVerify {
+		t.Fatalf("passes = %+v, want one pass with verify outcome recorded", result.Passes)
+	}
+	if errors.Is(err, ErrRewriteAttemptsExceeded) {
+		t.Fatal("error should not be ErrRewriteAttemptsExceeded when context was cancelled")
+	}
+}

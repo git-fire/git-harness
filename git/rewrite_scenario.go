@@ -125,6 +125,11 @@ func RunRewriteScenario(ctx context.Context, opts RewriteScenarioOptions) (Rewri
 			result.Clean = true
 			return result, nil
 		}
+
+		if err := ctx.Err(); err != nil {
+			result.Attempts = attempt
+			return result, fmt.Errorf("rewrite scenario cancelled after verify on attempt %d: %w", attempt, err)
+		}
 	}
 
 	result.Attempts = opts.MaxAttempts
