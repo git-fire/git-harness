@@ -22,7 +22,7 @@ go vet ./...
 go test -race -count=1 ./...
 ```
 
-## Rewrite Orchestration (git-fcuk flow)
+## Rewrite orchestration
 
 The `git` package now includes bounded multi-pass rewrite orchestration via
 `RunRewriteScenario`, designed for flows that must:
