@@ -92,12 +92,24 @@ func RunRewriteScenario(ctx context.Context, opts RewriteScenarioOptions) (Rewri
 			return result, nil
 		}
 
+		if err := ctx.Err(); err != nil {
+			result.Attempts = attempt
+			result.Passes = append(result.Passes, pass)
+			return result, fmt.Errorf("rewrite scenario cancelled before intervene on attempt %d: %w", attempt, err)
+		}
+
 		if err := opts.Intervene(ctx, attempt); err != nil {
 			result.Attempts = attempt
 			result.Passes = append(result.Passes, pass)
 			return result, fmt.Errorf("intervene failed on attempt %d: %w", attempt, err)
 		}
 		pass.Intervened = true
+
+		if err := ctx.Err(); err != nil {
+			result.Attempts = attempt
+			result.Passes = append(result.Passes, pass)
+			return result, fmt.Errorf("rewrite scenario cancelled before verify on attempt %d: %w", attempt, err)
+		}
 
 		clean, err := opts.Verify(ctx, attempt)
 		if err != nil {
