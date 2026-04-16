@@ -5,7 +5,7 @@
 
 ## Goal
 Produce a written classification of every internal symbol in `git-fire` (and overlapping code in
-`git-fcuk`) that is a candidate for extraction into `github.com/git-fire/git-harness`.
+any in-development history-rewrite companion that shares internals) that is a candidate for extraction into `github.com/git-fire/git-harness`.
 
 ## Output
 `specs/001-git-harness-audit/audit.md` — a table + narrative covering every package scanned.
@@ -17,9 +17,9 @@ Produce a written classification of every internal symbol in `git-fire` (and ove
   is automatically `KEEP`.
 - Any symbol with zero app-layer dependencies is `EXTRACT` unless it's dead code.
 - `audit.md` includes a "Shared duplication" section listing symbols that exist in BOTH
-  `git-fire` and `git-fcuk` — these are highest-priority extractions.
+  `git-fire` and the companion tooling — these are highest-priority extractions.
 - No code is modified in this spec.
 
 ## Notes
 - Use `grep -r "cobra\|viper\|bubbletea\|lipgloss\|charmbracelet"` as a quick filter.
-- Cross-reference `git-fcuk/internal/git` against `git-fire/internal/git` for duplication.
+- Cross-reference the companion repository's `internal/git` (when available) against `git-fire/internal/git` for duplication.
