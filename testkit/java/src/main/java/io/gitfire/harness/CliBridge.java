@@ -279,16 +279,10 @@ public final class CliBridge {
   }
 
   private JsonObject invokeObject(JsonObject request) {
-    String raw = invokeRaw(GSON.toJson(request));
-    JsonObject obj = JsonParser.parseString(raw).getAsJsonObject();
-    if (!obj.has("ok") || !obj.get("ok").getAsBoolean()) {
-      String err = obj.has("error") ? obj.get("error").getAsString() : "unknown error";
-      throw new RuntimeException(err);
-    }
-    return obj;
+    return invokeRaw(GSON.toJson(request));
   }
 
-  private String invokeRaw(String payload) {
+  private JsonObject invokeRaw(String payload) {
     CliResult result = runCli(payload);
     String stdout = result.stdout == null ? "" : result.stdout.trim();
     String stderr = result.stderr == null ? "" : result.stderr.trim();
@@ -303,7 +297,7 @@ public final class CliBridge {
       String err = head.has("error") ? head.get("error").getAsString() : stderr;
       throw new RuntimeException(err.isEmpty() ? "CLI failed with code " + result.code : err);
     }
-    return stdout;
+    return head;
   }
 
   private CliResult runCli(String payload) {
