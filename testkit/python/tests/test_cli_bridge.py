@@ -26,6 +26,8 @@ def test_analyze_repository_finds_git_dir(tmp_path: Path) -> None:
     repo = tmp_path / "r"
     repo.mkdir()
     _run_git(repo, "init")
+    _run_git(repo, "config", "user.email", "harness-test@example.com")
+    _run_git(repo, "config", "user.name", "git-harness test")
     (repo / "a.txt").write_text("x\n")
     _run_git(repo, "add", "a.txt")
     _run_git(repo, "commit", "-m", "init")
@@ -72,6 +74,8 @@ def test_scan_repositories_finds_nested_repo(tmp_path: Path) -> None:
     inner = outer / "nested" / "proj"
     inner.mkdir(parents=True)
     _run_git(inner, "init")
+    _run_git(inner, "config", "user.email", "harness-test@example.com")
+    _run_git(inner, "config", "user.name", "git-harness test")
     (inner / "f").write_text("1\n")
     _run_git(inner, "add", "f")
     _run_git(inner, "commit", "-m", "c")
@@ -83,6 +87,30 @@ def test_scan_repositories_finds_nested_repo(tmp_path: Path) -> None:
     )
     paths = {os.path.realpath(r["path"]) for r in repos}
     assert os.path.realpath(str(inner)) in paths
+
+
+def test_cli_rejects_unknown_json_keys() -> None:
+    """parseRequest uses DisallowUnknownFields — typos must fail fast."""
+    root = Path(__file__).resolve().parents[3]
+    cli = os.environ.get("GIT_HARNESS_CLI", "").strip()
+    cmd = [cli] if cli else ["go", "run", "./cmd/git-harness-cli"]
+    if cli and not Path(cli).is_file() and shutil.which(cli) is None:
+        cmd = [str((root / cli).resolve())]
+    proc = subprocess.run(
+        cmd,
+        cwd=root,
+        input=json.dumps({"op": "safety_security_notice", "typoField": 1}),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        check=False,
+        timeout=120,
+    )
+    assert proc.returncode != 0
+    body = json.loads((proc.stdout or "").strip() or "{}")
+    assert body.get("ok") is False
+    assert "error" in body
 
 
 def test_subprocess_json_contract_smoke() -> None:

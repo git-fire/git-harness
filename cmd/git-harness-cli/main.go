@@ -138,7 +138,9 @@ func main() {
 
 func parseRequest() (request, error) {
 	var req request
-	if err := json.NewDecoder(os.Stdin).Decode(&req); err != nil {
+	dec := json.NewDecoder(os.Stdin)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&req); err != nil {
 		return request{}, fmt.Errorf("invalid JSON request: %w", err)
 	}
 	if strings.TrimSpace(req.Op) == "" {

@@ -27,9 +27,10 @@ def _cli_cmd() -> list[str]:
 
 def _call(op: str, **payload: Any) -> dict[str, Any]:
     request = {"op": op, **payload}
+    cmd = _cli_cmd()
     try:
         proc = subprocess.run(
-            _cli_cmd(),
+            cmd,
             cwd=_repo_root(),
             input=json.dumps(request),
             text=True,
@@ -42,6 +43,10 @@ def _call(op: str, **payload: Any) -> dict[str, Any]:
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError(
             f"git-harness-cli timed out after {_CLI_TIMEOUT_SECONDS}s (op={op})"
+        ) from exc
+    except OSError as exc:
+        raise RuntimeError(
+            f"git-harness-cli failed to start (op={op}): {exc}"
         ) from exc
     stdout = (proc.stdout or "").strip()
     stderr = (proc.stderr or "").strip()
