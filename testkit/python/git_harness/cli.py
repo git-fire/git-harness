@@ -172,16 +172,12 @@ class GitHarnessClient:
         *,
         message: str = "",
         add_all: bool = False,
-        use_dual_branch: bool = True,
-        return_to_original: bool = True,
     ) -> None:
         _call(
             "git_auto_commit_dirty",
             repoPath=repo_path,
             message=message,
             addAll=add_all,
-            useDualBranch=use_dual_branch,
-            returnToOriginal=return_to_original,
         )
 
     def auto_commit_dirty_with_strategy(

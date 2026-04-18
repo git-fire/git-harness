@@ -19,7 +19,6 @@
       "addAll": {"type": "boolean"},
       "useDualBranch": {"type": "boolean"},
       "returnToOriginal": {"type": "boolean"},
-      "args": {"type": "array", "items": {"type": "string"}},
       "scanOptions": {"type": "object"},
       "text": {"type": "string"},
       "files": {"type": "array", "items": {"type": "string"}},

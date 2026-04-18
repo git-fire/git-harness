@@ -23,17 +23,16 @@ type request struct {
 	// git_get_commit_sha, git_ref_is_ancestor
 	Ref string `json:"ref,omitempty"`
 	// git_ref_is_ancestor
-	AncestorRef      string   `json:"ancestorRef,omitempty"`
-	DescendantRef    string   `json:"descendantRef,omitempty"`
-	Branch           string   `json:"branch,omitempty"`
-	Remote           string   `json:"remote,omitempty"`
-	OriginalBranch   string   `json:"originalBranch,omitempty"`
-	LocalSHA         string   `json:"localSHA,omitempty"`
-	Message          string   `json:"message,omitempty"`
-	AddAll           *bool    `json:"addAll,omitempty"`
-	UseDualBranch    *bool    `json:"useDualBranch,omitempty"`
-	ReturnToOriginal *bool    `json:"returnToOriginal,omitempty"`
-	Args             []string `json:"args,omitempty"`
+	AncestorRef      string `json:"ancestorRef,omitempty"`
+	DescendantRef    string `json:"descendantRef,omitempty"`
+	Branch           string `json:"branch,omitempty"`
+	Remote           string `json:"remote,omitempty"`
+	OriginalBranch   string `json:"originalBranch,omitempty"`
+	LocalSHA         string `json:"localSHA,omitempty"`
+	Message          string `json:"message,omitempty"`
+	AddAll           *bool  `json:"addAll,omitempty"`
+	UseDualBranch    *bool  `json:"useDualBranch,omitempty"`
+	ReturnToOriginal *bool  `json:"returnToOriginal,omitempty"`
 
 	// safety
 	Text            string                `json:"text,omitempty"`
@@ -300,15 +299,12 @@ func handle(req request) (response, error) {
 		if req.RepoPath == "" {
 			return response{}, fmt.Errorf("missing repoPath")
 		}
+		if req.UseDualBranch != nil || req.ReturnToOriginal != nil {
+			return response{}, fmt.Errorf("git_auto_commit_dirty does not support useDualBranch or returnToOriginal; use git_auto_commit_dirty_with_strategy")
+		}
 		co := git.CommitOptions{Message: req.Message}
 		if req.AddAll != nil {
 			co.AddAll = *req.AddAll
-		}
-		if req.UseDualBranch != nil {
-			co.UseDualBranch = *req.UseDualBranch
-		}
-		if req.ReturnToOriginal != nil {
-			co.ReturnToOriginal = *req.ReturnToOriginal
 		}
 		if err := git.AutoCommitDirty(req.RepoPath, co); err != nil {
 			return response{}, err
