@@ -2,7 +2,7 @@
 
 ## Mission
 Extract reusable git primitives from `github.com/git-fire/git-fire` into a new standalone module
-`github.com/git-fire/git-harness`. Consume it from both `git-fire` and `git-fcuk` without
+`github.com/git-fire/git-harness`. Consume it from both `git-fire` and the companion history CLI (unreleased; same shared primitives) without
 breaking any existing behavior. Then follow the same multi-language pattern established by
 `git-testkit` to ship Python and Java wrappers.
 
@@ -10,13 +10,13 @@ Tests are the contract — every deletion must be covered before it happens.
 
 ## Repo context (you can read all of these)
 - `git-fire/git-fire` — main CLI; has `internal/git`, `internal/safety`, `internal/executor`, `internal/repo`
-- `git-fire/git-fcuk` — history surgery CLI; likely duplicates git-fire primitives
+- Companion history CLI (unreleased; git-fire org) — likely duplicates git-fire primitives
 - `git-fire/git-testkit` — READ THIS FIRST. Mirror its repo structure, wrapper pattern, CI setup,
   and language interface conventions exactly for git-harness.
 - `git-harness` — does NOT exist yet; you will create it
 
 ## Go version floor
-Align to `go 1.24` across all modules. Bump git-fcuk if it's behind.
+Align to `go 1.24` across all modules. Bump the companion module if it's behind.
 
 ## Naming
 - Go module: `github.com/git-fire/git-harness`
@@ -48,7 +48,7 @@ In **git-fire**, read every file under:
 - `internal/executor/`
 - `internal/repo/`
 
-In **git-fcuk**, read every file under:
+In the **companion CLI** repository, read every file under:
 - `internal/git/`
 - `internal/repo/`
 - any other non-UI, non-CLI-specific internals
@@ -73,7 +73,7 @@ Produce `specs/001-git-harness-audit/audit.md` inside git-fire. Do not move any 
 ## Phase 2 — Test Coverage Before Surgery
 
 ### 2.1 Coverage baseline
-Run `go test ./...` in git-fire and git-fcuk. Record coverage per package.
+Run `go test ./...` in git-fire and the companion CLI. Record coverage per package.
 Any `EXTRACT`-classified package below **80% coverage** must be brought to 80% before Phase 3.
 
 ### 2.2 Write missing tests
@@ -120,7 +120,7 @@ git-harness/
 ```
 
 > **Local wiring (temporary):** Add `replace github.com/git-fire/git-harness => ../git-harness`
-> to git-fire/go.mod and git-fcuk/go.mod. Remove before tagging v0.1.0.
+> to git-fire/go.mod and the companion CLI's go.mod. Remove before tagging v0.1.0.
 
 ### 3.2 Copy EXTRACT code
 For each `EXTRACT`-classified file/symbol:
@@ -147,10 +147,10 @@ for every `EXTRACT`-classified import. Leave `KEEP` imports untouched.
 `go build ./... && go test ./...` must be green.
 Commit: `feat(git-harness): consume git-harness in git-fire`
 
-### Step 2 — Rewrite imports in git-fcuk
+### Step 2 — Rewrite imports in the companion CLI
 Same as Step 1.
 `go build ./... && go test ./...` must be green.
-Commit: `feat(git-harness): consume git-harness in git-fcuk`
+Commit: `feat(git-harness): consume git-harness in companion CLI`
 
 ### Step 3 — Delete dead code from git-fire
 Only after both consumers compile and test green:
@@ -158,9 +158,9 @@ Only after both consumers compile and test green:
 - `go build ./... && go test ./...`
 Commit: `refactor(git-harness): remove extracted internals from git-fire`
 
-### Step 4 — Delete dead code from git-fcuk (if applicable)
+### Step 4 — Delete dead code from the companion CLI (if applicable)
 Same as Step 3.
-Commit: `refactor(git-harness): remove extracted internals from git-fcuk`
+Commit: `refactor(git-harness): remove extracted internals from companion CLI`
 
 ---
 
@@ -228,7 +228,7 @@ git push origin v0.1.0
 ```
 
 ### 7.2 Remove replace directives
-In git-fire/go.mod and git-fcuk/go.mod:
+In git-fire/go.mod and the companion CLI's go.mod:
 - Remove `replace github.com/git-fire/git-harness => ...`
 - Run `go get github.com/git-fire/git-harness@v0.1.0` + `go mod tidy` in each
 
@@ -240,7 +240,7 @@ go build ./... && go test -race ./... && go vet ./...
 # git-fire
 go build ./... && go test ./... && go vet ./...
 
-# git-fcuk
+# companion CLI
 go build ./... && go test ./... && go vet ./...
 ```
 
@@ -266,7 +266,7 @@ Commit consumers: `chore(git-harness): pin to published git-harness v0.1.0`
 - [ ] Coverage ≥ 80% on all EXTRACT packages (both repos)
 - [ ] `git-harness` Go module builds and tests pass
 - [ ] `git-fire` updated, builds, tests pass
-- [ ] `git-fcuk` updated, builds, tests pass
+- [ ] Companion CLI updated, builds, tests pass
 - [ ] Dead code deleted from both consumers
 - [ ] Python wrapper implemented, tested, CI'd
 - [ ] Java wrapper implemented, tested, CI'd
