@@ -1,2 +1,8 @@
 # Local reference clones (not part of this module)
 /mnt/
+
+# testkit (polyglot) build artifacts
+testkit/python/**/__pycache__/
+testkit/python/**/*.egg-info/
+testkit/python/.pytest_cache/
+testkit/java/target/

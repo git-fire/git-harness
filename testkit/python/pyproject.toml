@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "git-harness-polyglot-python"
+version = "0.1.0"
+description = "Python wrapper for git-harness CLI bridge"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["git_harness*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

@@ -9,6 +9,10 @@ Go library extracted from [git-fire](https://github.com/git-fire/git-fire): subp
 - **`git`** — repository scanning, status, commits, pushes, worktrees, and related helpers.
 - **`safety`** — redaction and secret-pattern scanning helpers used by git error paths.
 
+## Polyglot wrappers
+
+Python and Java clients use the same layout as [git-testkit](https://github.com/git-fire/git-testkit) under **`testkit/`**: build `cmd/git-harness-cli`, set **`GIT_HARNESS_CLI`** to that binary (or rely on `go run ./cmd/git-harness-cli` from the repo root). Code lives in `testkit/python` and `testkit/java`; runnable samples are `testkit/python/samples/` and the Java `Sample*Smoke` tests.
+
 ## Requirements
 
 - Go **1.24**+ (see `go.mod`).

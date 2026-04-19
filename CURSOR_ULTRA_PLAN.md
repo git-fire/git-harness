@@ -113,11 +113,10 @@ git-harness/
   .github/
     workflows/
       ci.yml          # Go build + test + vet
-  wrappers/           # placeholder dirs for Phase 5 & 6
+  testkit/            # polyglot layout (mirror git-testkit)
     python/
-      .gitkeep
     java/
-      .gitkeep
+    .specify/
 ```
 
 > **Local wiring (temporary):** Add `replace github.com/git-fire/git-harness => ../git-harness`
@@ -170,11 +169,11 @@ Commit: `refactor(git-harness): remove extracted internals from companion CLI`
 > Follow git-testkit's Python wrapper structure exactly. Read it before writing anything here.
 
 ### 5.1 Scaffold
-Mirror whatever structure git-testkit uses under `wrappers/python/`. This likely means:
-- A Python package under `wrappers/python/git_harness/`
+Mirror whatever structure git-testkit uses under `testkit/python/`. This likely means:
+- A Python package under `testkit/python/git_harness/`
 - Build tooling (cffi, ctypes, subprocess bridge, or whatever git-testkit uses)
 - `pyproject.toml` / `setup.py`
-- `wrappers/python/README.md`
+- `testkit/python/README.md`
 
 ### 5.2 Implement
 Expose the same surface area as the Go module — subprocess runner, safety/sanitize, repo introspection.
@@ -198,10 +197,10 @@ Commit: `feat(git-harness): Python wrapper`
 > Follow git-testkit's Java wrapper structure exactly. Read it before writing anything here.
 
 ### 6.1 Scaffold
-Mirror whatever structure git-testkit uses under `wrappers/java/`. Likely:
-- Maven or Gradle project under `wrappers/java/`
+Mirror whatever structure git-testkit uses under `testkit/java/`. Likely:
+- Maven or Gradle project under `testkit/java/`
 - `src/main/java/io/gitfire/harness/`
-- `wrappers/java/README.md`
+- `testkit/java/README.md`
 
 ### 6.2 Implement
 Expose the same surface area as the Go module.
