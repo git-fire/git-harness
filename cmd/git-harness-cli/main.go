@@ -67,7 +67,6 @@ type response struct {
 	Repository   *repositoryOut  `json:"repository,omitempty"`
 
 	Dirty           *bool                  `json:"dirty,omitempty"`
-	Output          *string                `json:"output,omitempty"`
 	SHA             string                 `json:"sha,omitempty"`
 	Branches        []string               `json:"branches,omitempty"`
 	HasConflict     *bool                  `json:"hasConflict,omitempty"`

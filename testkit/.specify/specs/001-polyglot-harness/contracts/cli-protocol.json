@@ -45,7 +45,6 @@
       "repositories": {"type": "array"},
       "repository": {"type": "object"},
       "dirty": {"type": "boolean"},
-      "output": {"type": "string"},
       "sha": {"type": "string"},
       "branch": {"type": "string"},
       "hasConflict": {"type": "boolean"},
