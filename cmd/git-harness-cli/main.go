@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -142,6 +143,13 @@ func parseRequest() (request, error) {
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&req); err != nil {
 		return request{}, fmt.Errorf("invalid JSON request: %w", err)
+	}
+	var trailer json.RawMessage
+	if err := dec.Decode(&trailer); err != io.EOF {
+		if err == nil {
+			return request{}, fmt.Errorf("invalid JSON request: multiple JSON values")
+		}
+		return request{}, fmt.Errorf("invalid JSON request: trailing data: %w", err)
 	}
 	if strings.TrimSpace(req.Op) == "" {
 		return request{}, fmt.Errorf("missing required field: op")

@@ -7,7 +7,10 @@ import shutil
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from git_harness import GitHarnessClient, ScanOptions
+from git_harness.cli import _cli_cmd
 
 
 def _run_git(repo: Path, *args: str) -> None:
@@ -89,15 +92,20 @@ def test_scan_repositories_finds_nested_repo(tmp_path: Path) -> None:
     assert os.path.realpath(str(inner)) in paths
 
 
-def test_cli_rejects_unknown_json_keys() -> None:
-    """parseRequest uses DisallowUnknownFields — typos must fail fast."""
+def _git_harness_cli_cmd() -> list[str]:
     root = Path(__file__).resolve().parents[3]
     cli = os.environ.get("GIT_HARNESS_CLI", "").strip()
     cmd = [cli] if cli else ["go", "run", "./cmd/git-harness-cli"]
     if cli and not Path(cli).is_file() and shutil.which(cli) is None:
         cmd = [str((root / cli).resolve())]
+    return cmd
+
+
+def test_cli_rejects_unknown_json_keys() -> None:
+    """parseRequest uses DisallowUnknownFields — typos must fail fast."""
+    root = Path(__file__).resolve().parents[3]
     proc = subprocess.run(
-        cmd,
+        _git_harness_cli_cmd(),
         cwd=root,
         input=json.dumps({"op": "safety_security_notice", "typoField": 1}),
         text=True,
@@ -113,16 +121,51 @@ def test_cli_rejects_unknown_json_keys() -> None:
     assert "error" in body
 
 
+def test_cli_rejects_trailing_second_json_value() -> None:
+    root = Path(__file__).resolve().parents[3]
+    payload = (
+        json.dumps({"op": "safety_security_notice"})
+        + json.dumps({"op": "git_is_dirty"})
+    )
+    proc = subprocess.run(
+        _git_harness_cli_cmd(),
+        cwd=root,
+        input=payload,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        check=False,
+        timeout=120,
+    )
+    assert proc.returncode != 0
+    body = json.loads((proc.stdout or "").strip() or "{}")
+    assert body.get("ok") is False
+    err = str(body.get("error", "")).lower()
+    assert "multiple" in err or "trailing" in err
+
+
+def test_cli_cmd_prefers_path_lookup_for_bare_executable_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("GIT_HARNESS_CLI", raising=False)
+    monkeypatch.setenv("GIT_HARNESS_CLI", "git-harness-cli")
+    fake = "/opt/bin/git-harness-cli"
+
+    def fake_which(cmd: str, path: str | None = None) -> str | None:
+        if cmd == "git-harness-cli":
+            return fake
+        return shutil.which(cmd, path=path)
+
+    monkeypatch.setattr(shutil, "which", fake_which)
+    assert _cli_cmd() == [fake]
+
+
 def test_subprocess_json_contract_smoke() -> None:
     """Guardrail: stdin JSON shape accepted by the Go CLI."""
     root = Path(__file__).resolve().parents[3]
-    cli = os.environ.get("GIT_HARNESS_CLI", "").strip()
-    cmd = [cli] if cli else ["go", "run", "./cmd/git-harness-cli"]
-    if cli and not Path(cli).is_file() and shutil.which(cli) is None:
-        # Relative path from repo root (typical in CI)
-        cmd = [str((root / cli).resolve())]
     proc = subprocess.run(
-        cmd,
+        _git_harness_cli_cmd(),
         cwd=root,
         input=json.dumps({"op": "safety_security_notice"}),
         text=True,

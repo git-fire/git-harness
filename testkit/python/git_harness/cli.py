@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -17,12 +18,20 @@ def _repo_root() -> Path:
 
 def _cli_cmd() -> list[str]:
     cli = os.environ.get("GIT_HARNESS_CLI", "").strip()
-    if cli:
-        cli_path = Path(cli)
-        if not cli_path.is_absolute():
-            cli_path = _repo_root() / cli_path
+    if not cli:
+        return ["go", "run", "./cmd/git-harness-cli"]
+
+    expanded = os.path.expanduser(cli)
+    cli_path = Path(expanded)
+    if cli_path.is_absolute():
         return [str(cli_path)]
-    return ["go", "run", "./cmd/git-harness-cli"]
+    # Repo-relative paths include any directory component; bare names use PATH.
+    if cli_path.parent != Path("."):
+        return [str((_repo_root() / cli_path).resolve())]
+    resolved = shutil.which(cli)
+    if resolved:
+        return [resolved]
+    return [str((_repo_root() / cli_path).resolve())]
 
 
 def _call(op: str, **payload: Any) -> dict[str, Any]:
