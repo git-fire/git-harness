@@ -49,7 +49,7 @@ type scanOptionsInput struct {
 	CacheTTL    string          `json:"cacheTTL,omitempty"`
 	Workers     int             `json:"workers,omitempty"`
 	KnownPaths  map[string]bool `json:"knownPaths,omitempty"`
-	DisableScan bool            `json:"disableScan,omitempty"`
+	DisableScan *bool           `json:"disableScan,omitempty"`
 }
 
 type suspiciousFileInput struct {
@@ -132,7 +132,9 @@ func main() {
 		writeResponse(response{OK: false, Error: err.Error()})
 		os.Exit(1)
 	}
-	writeResponse(res)
+	if err := writeResponse(res); err != nil {
+		os.Exit(1)
+	}
 }
 
 func parseRequest() (request, error) {
@@ -462,7 +464,9 @@ func mergeScanOptions(in *scanOptionsInput) (git.ScanOptions, error) {
 	if in.KnownPaths != nil {
 		opts.KnownPaths = in.KnownPaths
 	}
-	opts.DisableScan = in.DisableScan
+	if in.DisableScan != nil {
+		opts.DisableScan = *in.DisableScan
+	}
 	return opts, nil
 }
 
@@ -487,7 +491,7 @@ func repoToOut(r git.Repository) repositoryOut {
 	}
 }
 
-func writeResponse(res response) {
+func writeResponse(res response) error {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetEscapeHTML(false)
 	if err := enc.Encode(res); err != nil {
@@ -500,5 +504,7 @@ func writeResponse(res response) {
 		if encodeErr := stderrEnc.Encode(fallback); encodeErr != nil {
 			fmt.Fprintf(os.Stderr, "failed writing fallback response: %v\n", encodeErr)
 		}
+		return err
 	}
+	return nil
 }

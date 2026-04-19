@@ -174,10 +174,20 @@ public final class CliBridge {
     String configuredCli = System.getenv("GIT_HARNESS_CLI");
     if (configuredCli != null && !configuredCli.isBlank()) {
       Path cliPath = Paths.get(configuredCli);
-      if (!cliPath.isAbsolute()) {
-        cliPath = workspaceRoot.resolve(cliPath).normalize();
+      if (cliPath.isAbsolute()) {
+        return List.of(cliPath.toString());
       }
-      return List.of(cliPath.toString());
+      // Check if it's a path-like value (contains separators or starts with ./ or ../)
+      boolean isPathLike = configuredCli.contains("/")
+          || configuredCli.contains(java.io.File.separator)
+          || configuredCli.startsWith("./")
+          || configuredCli.startsWith("../");
+      if (isPathLike) {
+        cliPath = workspaceRoot.resolve(cliPath).normalize();
+        return List.of(cliPath.toString());
+      }
+      // Bare executable name - let ProcessBuilder perform PATH lookup
+      return List.of(configuredCli);
     }
     return List.of("go", "run", "./cmd/git-harness-cli");
   }
