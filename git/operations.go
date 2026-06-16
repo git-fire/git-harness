@@ -87,6 +87,7 @@ func IsDirty(repoPath string) (bool, error) {
 func DetectConflict(repoPath, branch, remote string) (bool, string, string, error) {
 	cmd := exec.Command("git", "fetch", remote)
 	cmd.Dir = repoPath
+	PrepareNetworkGit(cmd)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return false, "", "", commandError("git fetch", err, output)
 	}
@@ -162,6 +163,7 @@ func RefIsAncestor(repoPath, ancestorRef, descendantRef string) (bool, error) {
 func FetchRemote(repoPath, remote string) error {
 	cmd := exec.Command("git", "fetch", remote)
 	cmd.Dir = repoPath
+	PrepareNetworkGit(cmd)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return commandError("git fetch", err, output)
 	}
@@ -191,6 +193,7 @@ func CreateFireBranch(repoPath, originalBranch, localSHA string) (string, error)
 func PushBranch(repoPath, remote, branch string) error {
 	cmd := exec.Command("git", "push", remote, branch)
 	cmd.Dir = repoPath
+	PrepareNetworkGit(cmd)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
@@ -203,6 +206,7 @@ func PushBranch(repoPath, remote, branch string) error {
 func PushAllBranches(repoPath, remote string) error {
 	cmd := exec.Command("git", "push", remote, "--all")
 	cmd.Dir = repoPath
+	PrepareNetworkGit(cmd)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
