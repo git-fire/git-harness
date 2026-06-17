@@ -27,4 +27,19 @@ These notes apply to humans and to automated agents (including Cloud Agents).
 
 ---
 
+## Cursor Cloud specific instructions
+
+This repo is the `git-harness` Go library plus a CLI and polyglot (Python + Java) wrappers. Standard commands live in `README.md` and `.github/workflows/ci.yml`; only the non-obvious cloud caveats are noted here.
+
+**Layers**
+- Go core (`git/`, `safety/`): `go build ./...`, `go vet ./...`, `go test -race -count=1 ./...` (see `README.md`).
+- CLI (`cmd/git-harness-cli`): a stdin/stdout JSON bridge. Build with `go build -o ./bin/git-harness-cli ./cmd/git-harness-cli`.
+- Wrappers (`testkit/python`, `testkit/java`): both shell out to the CLI and require `GIT_HARNESS_CLI` to point at the built binary (e.g. `export GIT_HARNESS_CLI=/workspace/bin/git-harness-cli`). Build the CLI first.
+
+**Python wrapper**: Ubuntu is PEP 668 managed, so deps live in a dedicated venv at `~/.venvs/git-harness` (created by the update script). Run tests/samples with that interpreter, from `testkit/python`: `"$HOME/.venvs/git-harness/bin/python" -m pytest tests/ -q` and `-m samples.smoke_repo_flow` / `-m samples.smoke_safety_flow`. Note CI calls bare `python`, but only `python3` exists here.
+
+**Java wrapper**: needs Maven + JDK 21 (baked into the snapshot). From `testkit/java`: `mvn test`, and samples via `mvn -Dtest=SampleRepoFlowSmoke,SampleSafetyFlowSmoke test`. First run populates the `~/.m2` cache.
+
+**Known cloud-only test failure**: `git/command_test.go::TestFetchRemote_UnauthenticatedHTTPSFailsWithoutPrompt` fails in this environment. The cloud agent configures a global `url.https://x-access-token:<token>@github.com/.insteadOf` rewrite, so the "unauthenticated" fetch is actually authenticated and GitHub returns `Repository not found` instead of the expected credential-prompt error. This is an environment artifact, not a code bug; it passes in clean CI. Skip it with `-skip 'TestFetchRemote_UnauthenticatedHTTPSFailsWithoutPrompt'` when validating locally.
+
 
